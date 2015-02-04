@@ -1,0 +1,9 @@
+---
+rest:
+  path: /srv/ripple-rest
+  log_dir: /srv/ripple-rest/shared/logs
+  log: rest.log
+  user: restful
+  group: restful
+  version: release
+  pid_file: /home/restful/ripple-rest.pid

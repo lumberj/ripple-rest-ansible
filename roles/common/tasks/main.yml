@@ -1,0 +1,9 @@
+---
+- name: update cache
+  apt:  cache_valid_time=3600 update_cache=yes
+
+- name: install git
+  apt: name=git state=present cache_valid_time=3600
+
+- name: install monit
+  apt: name=monit state=present cache_valid_time=3600

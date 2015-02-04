@@ -1,0 +1,9 @@
+{{ rest.log_dir }}/{{ rest.log }} {
+        rotate 4
+        weekly
+        create 640 {{ rest.user }} {{ rest.group }}
+        compress
+        postrotate
+                restart ripple-rest
+        endscript
+}

@@ -1,0 +1,21 @@
+{% for key, value in nginx.settings.iteritems() %}
+{{ key }} {{ value }};
+{% endfor %}
+
+events {
+	{% for key, value in nginx.events.iteritems() %}
+	{{ key }} {{ value }};
+	{% endfor %}
+}
+
+http {
+
+	{% for key, value in nginx.http.iteritems() %}
+	{{ key }} {{ value }};
+	{% endfor %}
+
+	{% for file in nginx.includes %}
+	include {{ file }};
+	{% endfor %}
+}
+

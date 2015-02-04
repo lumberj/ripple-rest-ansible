@@ -1,0 +1,139 @@
+#! /bin/sh
+
+# If you wish the Daemon to be lauched at boot / stopped at shutdown:
+#	INSTALL : update-rc.d ripple-rest defaults
+#	UNINSTALL : update-rc.d -f ripple-rest remove
+
+### BEGIN INIT INFO
+# Provides:          ripple-rest
+# Required-Start:    $remote_fs $named $syslog rippled
+# Required-Stop:     $remote_fs $named $syslog rippled
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: RESTful API server for rippled.
+# Description:       RESTful API server for rippled.
+### END INIT INFOVisual Studio Solution Explorer
+
+# Author: Bryce A. Lynch (bryce at ripple dot com)
+# PGP: 0xA4364248 / A177 A590 2869 32AC E2E1  946A FAD8 98D6 A436 4248
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+NAME=ripple-rest
+DAEMON=server.js
+DAEMON_DIR="/opt/ripple-rest"
+FOREVER=/usr/bin/forever
+DESC="node.js server which implements a RESTful interface to rippled."
+NODEUSER="restful"
+PIDFILE="/var/run/ripple-rest/$NAME.pid"
+ERROR="/var/log/ripple-rest/$NAME.err"
+LOG="/var/log/ripple-rest/$NAME.log"
+FOR="/var/log/ripple-rest/$NAME.for"
+
+# Needed to make Forever happy.
+export FOREVER_ROOT=/tmp/forever
+mkdir -p $FOREVER_ROOT
+chown -R $NODEUSER:$NODEUSER $FOREVER_ROOT
+
+# The app requires that the IP address it listens on be set with an environment
+# variable and not in a configuration file or on the command line.
+#export HOST=0.0.0.0
+
+# The app defaults to port 5990/tcp but supports being told to listen on
+# another port with an environment variable.
+#export PORT=5990
+
+# Do NOT put "set -e" here!
+
+# You must be this high <hand> to ride this ride.
+if [ `id -u` -gt 0 ]; then
+    echo "You must be root to update the $NAME codebase. ABENDing."
+    exit 1
+fi
+
+# If the directory for the PID file doesn't exist, create it and set ownership
+# properly.
+if [ ! -d /var/run/$NAME ]; then
+    mkdir -p /var/run/$NAME
+    chown -R $NODEUSER:$NODEUSER /var/run/$NAME
+fi
+
+# Read configuration variable file if one exists.  Note that this can
+# potentially change the values of variables defined earlier in this script.
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the other rcS variables.
+. /lib/init/vars.sh
+
+# Pull in the LSB log_* functions, chief among them log_daemon_msg(), which is
+# used to print stuff to the screen.
+. /lib/lsb/init-functions
+
+# Core code.
+case "$1" in
+    start)
+        echo "Starting Ripple RESTful API server... "
+        cd $DAEMON_DIR
+        sudo -u $NODEUSER -g $NODEUSER FOREVER_ROOT=$FOREVER_ROOT $FOREVER \
+            start --pidFile $PIDFILE --sourceDir $DAEMON_DIR -a \
+            -o $LOG -e $ERROR -l $FOR $DAEMON
+        ;;
+
+    stop)
+        echo "Stopping Ripple RESTful API server... "
+        cd $DAEMON_DIR
+        sudo -u $NODEUSER -g $NODEUSER FOREVER_ROOT=$FOREVER_ROOT $FOREVER \
+            stop $DAEMON
+        ;;
+
+    restart)
+        echo "Restarting $NAME..."
+        /etc/init.d/ripple-rest stop
+        sleep 1
+        /etc/init.d/ripple-rest start
+        ;;
+
+    upgrade)
+        echo "Updating $NAME to latest version. Press enter to continue or ^C to abort."
+        read pause
+
+        # Trap a couple of signals to keep things from getting messed up.
+        trap '' 2 # SIGINT
+        trap '' 9 # SIGKILL
+        trap '' 20 # SIGTSTP
+
+        echo "Stopping $NAME."
+        umask 0022
+        cd $DAEMON_DIR
+        /etc/init.d/ripple-rest stop
+
+        echo "Updating code repository."
+        #git stash
+        git pull
+
+        echo "Updating NPM modules."
+        npm install
+        #npm install --save pg
+
+        echo "Updating database schemas."
+        grunt
+
+        echo "Starting $NAME."
+        /etc/init.d/ripple-rest start
+
+        # Re-enable trapped signals.
+        trap 2
+        trap 9
+        trap 20
+        ;;
+
+    status)
+        sudo -u $NODEUSER -g $NODEUSER FOREVER_ROOT=$FOREVER_ROOT $FOREVER list
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status|upgrade}" >&2
+        exit 3
+        ;;
+esac
+
+# Fin.
+exit 0

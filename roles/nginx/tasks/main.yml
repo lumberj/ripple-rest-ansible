@@ -1,0 +1,66 @@
+---
+- name: install nginx web server
+  apt: >
+    name=nginx
+    state=present
+    cache_valid_time=3600
+
+- name: Create directories for site specific configuration
+  file: >
+    path=/etc/nginx/{{ item }}
+    state=directory
+    owner=root
+    group='{{ nginx.settings.user }}'
+    mode=0755
+  with_items:
+    - "sites-available"
+    - "sites-enabled"
+    - "conf.d"
+
+- name: Ensure log directory exists
+  file: >
+    path=/var/log/nginx
+    state=directory
+    owner='{{ nginx.settings.user }}'
+    group='{{ nginx.settings.user }}'
+    mode=0755
+
+- name: SSL Directory
+  file: >
+    path=/etc/nginx/ssl
+    owner=root
+    group=root
+    mode=740
+    state=directory
+
+- name: Create Self-Signed SSL Certs
+  command: openssl req -new -nodes -x509 -subj "/C=US/ST=California/L=SanFrancisco/O=Engineering/CN={{ nginx.rest.server.server_name}}" -days 3650 -keyout /etc/nginx/ssl/server.key -out /etc/nginx/ssl/server.crt -extensions v3_ca creates=/etc/nginx/ssl/server.crt
+  notify: reload nginx
+
+- name: Copy Nginx configuration files
+  template: >
+    src={{ item.src }} 
+    dest={{ item.dest }}
+  with_items:
+    - { src: 'nginx.conf.j2', dest: '/etc/nginx/nginx.conf' }
+    - { src: 'sites-available/rest.j2', dest: '/etc/nginx/sites-available/rest.conf' }
+  sudo: yes
+  notify: reload nginx
+
+- name: Remove default configuration file
+  file: >
+    path=/etc/nginx/sites-available/default
+    state=absent
+
+- name: Create links for sites-enabled
+  file: >
+    state=link
+    src=/etc/nginx/sites-available/rest.conf
+    dest=/etc/nginx/sites-enabled/rest.conf
+  notify: reload nginx
+
+- name: Check nginx syntax of configuration files
+  shell: nginx -t
+  register: result
+  changed_when: "result.rc != 0"
+  always_run: yes

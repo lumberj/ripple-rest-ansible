@@ -1,0 +1,19 @@
+server {
+    {% for key, value in nginx.rest.server.iteritems() %}
+    {{ key }} {{ value }};
+    {% endfor %}
+
+
+    location / {
+
+        {% for key, value in nginx.rest.proxy_params.iteritems() | sort if key != 'proxy_set_header' %}
+        {{ key }} {{ value }};
+        {% endfor %}
+
+        {% if nginx.rest.proxy_params.proxy_set_header is defined %}
+        {% for key, value in nginx.rest.proxy_params.proxy_set_header.iteritems() | sort %}
+        proxy_set_header {{ key }} {{ value }};
+        {% endfor %}
+        {% endif %}
+    }
+}

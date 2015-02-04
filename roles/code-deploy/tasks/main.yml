@@ -1,0 +1,32 @@
+- name: Create the deployment directory
+  file: path=/srv/{{ service_name }}/releases owner=ubuntu group=www-data state=directory
+
+- name: Create the deployment shared directory
+  file: path=/srv/{{ service_name }}/shared owner=ubuntu group=www-data state=directory
+
+- name: Create the deployment shared logs directory
+  file: path=/srv/{{ service_name }}/shared/logs owner=ubuntu group=www-data state=directory
+
+- name: Get release timestamp
+  command: date +%Y%m%d%H%M%S
+  register: timestamp
+
+- name: Name release directory
+  command: echo "/srv/{{ service_name }}/releases/{{ timestamp.stdout }}"
+  register: release_path
+
+- name: Create release directory
+  file: >
+    state=directory
+    owner=ubuntu
+    group=www-data
+    recurse=yes
+    path={{ release_path.stdout }}
+
+- name: checkout git repo into release directory
+  git: >
+    repo="https://{{ deploy_token }}@github.com/IIDEL-ORG/{{ repo }}.git"
+    dest="{{ release_path.stdout }}"
+    version=master
+    accept_hostkey=yes
+  sudo: no

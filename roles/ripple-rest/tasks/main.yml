@@ -1,0 +1,110 @@
+---
+- name: Create the ripple-rest user
+  group: >
+    name='{{rest.group }}'
+    state=present
+
+- name: Create the ripple-rest group
+  user: >
+    name='{{ rest.user }}'
+    state=present
+    group='{{ rest.group }}'
+
+- name: Create the deployment directory
+  file: >
+    path='{{ rest.path }}'/releases
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    state=directory
+    mode=755
+
+- name: Create the deployment shared logs directory
+  file: >
+    path='{{ rest.log_dir }}'
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    state=directory
+    mode=755
+
+- name: Get release timestamp
+  command: date +%Y%m%d%H%M%S
+  register: timestamp
+
+- name: Name release directory
+  command: echo "/srv/ripple-rest/releases/{{ timestamp.stdout }}"
+  register: release_path
+
+- name: Create release directory
+  file: >
+    state=directory
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    recurse=yes
+    path={{ release_path.stdout }}
+    mode=755
+
+- name: Link release into current directory
+  file: >
+    state=link
+    src='{{ release_path.stdout }}'
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    path='{{ rest.path }}/current'
+    mode=755
+
+- name: Get ripple-rest from Git
+  git: >
+    repo=https://github.com/ripple/ripple-rest.git
+    dest='{{ release_path.stdout }}'
+    version='{{ rest.version }}'
+    accept_hostkey=yes
+
+- name: npm install
+  npm: path={{ release_path.stdout }}
+
+- name: Copy ripple-rest config
+  template: >
+    src=config.json.j2
+    dest={{ release_path.stdout }}/config.json
+  notify: restart rest
+
+- name: Copy ripple-rest upstart script
+  template: >
+    src=upstart.j2
+    dest=/etc/init/ripple-rest.conf
+    mode=644
+    owner=root
+    group=root
+  notify: restart rest
+
+- name: Copy ripple-rest monit script
+  template: >
+    src=monit.j2
+    dest=/etc/monit/conf.d/ripple-rest
+    mode=644
+    owner=root
+    group=root
+
+- name: Reload monit
+  service: name=monit state=reloaded
+
+- name: Log rotation
+  template: >
+    src=logrotate.j2
+    dest=/etc/logrotate.d/ripple-rest
+    mode=644
+    owner=root
+    group=root
+
+- name: Ensure init.d script absent
+  file: path=/etc/init.d/ripple-rest state=absent
+
+- name: Start Rest
+  service: name=ripple-rest state=started
+
+- name: Monitor Rest
+  monit: name=ripple-rest state=monitored
+
+- name: Start Nginx
+  service: name=nginx state=started
+

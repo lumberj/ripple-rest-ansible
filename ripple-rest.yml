@@ -1,0 +1,10 @@
+# vim:ft=ansible:
+---
+- hosts: webservers
+  remote_user: ubuntu
+  sudo: yes
+  roles:
+    - common
+    - nodejs
+    - nginx
+    - ripple-rest
