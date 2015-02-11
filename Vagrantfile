@@ -37,7 +37,6 @@ Vagrant.configure(CONFIG_VERSION) do |config|
     # ansible.verbose = "vvvv"
 
     # For specifying only certain roles
-    # TODO: Need to quote the server name in config.json
     # ansible.tags = ['nginx','ripple-rest']
     ansible.tags = ['ripple-rest']
 
