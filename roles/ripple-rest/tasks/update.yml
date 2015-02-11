@@ -1,0 +1,54 @@
+---
+
+- name: Create the releases directory
+  file: >
+    path='{{ rest.path }}'/releases
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    state=directory
+    mode=755
+
+- name: Get release timestamp
+  command: date +%Y%m%d%H%M%S
+  register: timestamp
+
+- name: Name release directory
+  command: echo "/srv/ripple-rest/releases/{{ timestamp.stdout }}"
+  register: release_path
+
+- name: Create release directory
+  file: >
+    state=directory
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    recurse=yes
+    path={{ release_path.stdout }}
+    mode=755
+
+- name: Link release into current directory
+  file: >
+    state=link
+    src='{{ release_path.stdout }}'
+    owner='{{ rest.user }}'
+    group='{{ rest.group }}'
+    path='{{ rest.path }}/current'
+    mode=755
+
+- name: Get ripple-rest from Git
+  git: >
+    repo='{{ rest.repo }}'
+    dest='{{ rest.path }}/current'
+    version='{{ rest.version }}'
+    accept_hostkey=yes
+
+- name: npm install
+  npm: >
+    path='{{ rest.path }}/current'
+    production=true
+
+- name: Copy ripple-rest config
+  template: >
+    src=config.json.j2
+    dest={{ release_path.stdout }}/config.json
+  notify: restart rest
+

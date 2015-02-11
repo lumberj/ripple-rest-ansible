@@ -5,5 +5,8 @@ rest:
   log: rest.log
   user: restful
   group: restful
-  version: release
+  version: "{{ version }}"
   pid_file: /home/restful/ripple-rest.pid
+  port: "{{ rest_port }}"
+  host: "{{ rest_host }}"
+  repo: "https://github.com/ripple/ripple-rest"

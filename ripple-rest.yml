@@ -6,5 +6,5 @@
   roles:
     - common
     - nodejs
-    - nginx
-    - ripple-rest
+    - { role: nginx, tags: ['nginx'] }
+    - { role: ripple-rest, tags: ['ripple-rest'] }

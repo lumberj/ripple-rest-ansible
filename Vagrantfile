@@ -10,24 +10,19 @@ Vagrant.configure(CONFIG_VERSION) do |config|
 
   config.vm.box_check_update = true
 
+
+  # Forwards port 443 from the guest to the host on https://localhost:5990
   config.vm.network "forwarded_port", guest: 443, host: 5990
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.10"
+  # config.vm.network "private_network", ip: "192.168.33.10"
 
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
     vb.memory = "1024"
   end
 
-
-  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
-  # such as FTP and Heroku are also available. See the documentation at
-  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
-  # config.push.define "atlas" do |push|
-  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
-  # end
 
   # To run the provisioner again, just run `vagrant provision`
   # To provision directly with Ansible:
@@ -37,7 +32,15 @@ Vagrant.configure(CONFIG_VERSION) do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ripple-rest.yml"
-    ansible.verbose = "vvvv"
+
+    # For debugging, enable verbose output
+    # ansible.verbose = "vvvv"
+
+    # For specifying only certain roles
+    # TODO: Need to quote the server name in config.json
+    # ansible.tags = ['nginx','ripple-rest']
+    ansible.tags = ['ripple-rest']
+
 
     ansible.groups = {
       "webservers" => ["default"]

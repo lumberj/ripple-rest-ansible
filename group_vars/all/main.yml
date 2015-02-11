@@ -1,0 +1,10 @@
+---
+
+rippled_servers:
+  - '"wss://s1.ripple.com:443"'
+
+rest_url: "api.ripple.com"
+rest_port: "5990"
+rest_host: '"localhost"'
+version: "develop"
+update: True

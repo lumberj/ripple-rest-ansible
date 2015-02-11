@@ -10,13 +10,13 @@
     state=present
     group='{{ rest.group }}'
 
-- name: Create the deployment directory
-  file: >
-    path='{{ rest.path }}'/releases
-    owner='{{ rest.user }}'
-    group='{{ rest.group }}'
-    state=directory
-    mode=755
+- name: Check if running for the first time
+  stat: path='{{ rest.path }}'/releases
+  register: check_rest_path
+
+- name: Update or check out Ripple-REST for the first time
+  include: update.yml
+  when: update == True or check_rest_path.stat.isdir is not defined
 
 - name: Create the deployment shared logs directory
   file: >
@@ -25,48 +25,6 @@
     group='{{ rest.group }}'
     state=directory
     mode=755
-
-- name: Get release timestamp
-  command: date +%Y%m%d%H%M%S
-  register: timestamp
-
-- name: Name release directory
-  command: echo "/srv/ripple-rest/releases/{{ timestamp.stdout }}"
-  register: release_path
-
-- name: Create release directory
-  file: >
-    state=directory
-    owner='{{ rest.user }}'
-    group='{{ rest.group }}'
-    recurse=yes
-    path={{ release_path.stdout }}
-    mode=755
-
-- name: Link release into current directory
-  file: >
-    state=link
-    src='{{ release_path.stdout }}'
-    owner='{{ rest.user }}'
-    group='{{ rest.group }}'
-    path='{{ rest.path }}/current'
-    mode=755
-
-- name: Get ripple-rest from Git
-  git: >
-    repo=https://github.com/ripple/ripple-rest.git
-    dest='{{ release_path.stdout }}'
-    version='{{ rest.version }}'
-    accept_hostkey=yes
-
-- name: npm install
-  npm: path={{ release_path.stdout }}
-
-- name: Copy ripple-rest config
-  template: >
-    src=config.json.j2
-    dest={{ release_path.stdout }}/config.json
-  notify: restart rest
 
 - name: Copy ripple-rest upstart script
   template: >
@@ -84,9 +42,7 @@
     mode=644
     owner=root
     group=root
-
-- name: Reload monit
-  service: name=monit state=reloaded
+  notify: reload monit
 
 - name: Log rotation
   template: >
@@ -102,8 +58,8 @@
 - name: Start Rest
   service: name=ripple-rest state=started
 
-- name: Monitor Rest
-  monit: name=ripple-rest state=monitored
+- name: Start Monit
+  service: name=monit state=started
 
 - name: Start Nginx
   service: name=nginx state=started

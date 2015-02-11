@@ -8,7 +8,7 @@ console log
 
 env PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 env NODE_ENV="production"
-env APPLICATION_PATH="{{ release_path.stdout }}"
+env APPLICATION_PATH="{{ rest.path }}/current"
 env PIDFILE="{{ rest.pid_file }}"
 env LOG="{{ rest.log_dir }}/{{ rest.log }}"
 

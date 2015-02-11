@@ -1,20 +1,20 @@
-{% for key, value in nginx.settings.iteritems() %}
+{% for key, value in nginx.settings.iteritems()|sort %}
 {{ key }} {{ value }};
 {% endfor %}
 
 events {
-	{% for key, value in nginx.events.iteritems() %}
+	{% for key, value in nginx.conf.events.iteritems() %}
 	{{ key }} {{ value }};
 	{% endfor %}
 }
 
 http {
 
-	{% for key, value in nginx.http.iteritems() %}
+	{% for key, value in nginx.conf.http.iteritems() %}
 	{{ key }} {{ value }};
 	{% endfor %}
 
-	{% for file in nginx.includes %}
+	{% for file in nginx.conf.includes %}
 	include {{ file }};
 	{% endfor %}
 }
