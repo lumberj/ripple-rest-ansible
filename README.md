@@ -86,7 +86,7 @@ To specify a version to deploy, use the `version` variable:
 $ ansible_playbook ripple-rest.yml -i staging.yml --extra-vars "version=master"
 ```
 
-The version is simply a valid refspec for the [ripple-rest repository][5].
+The version can be the full 40-character SHA-1 hash, the literal string HEAD, a branch name, or a tag name for the [ripple-rest repository][5].
 See http://docs.ansible.com/git_module.html#examples
 
 ## Testing and Developmnt
