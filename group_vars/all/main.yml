@@ -5,6 +5,6 @@ rippled_servers:
 
 rest_url: "api.ripple.com"
 rest_port: "5990"
-rest_host: '"127.0.0.1"'
+rest_host: '127.0.0.1'
 version: "develop"
 update: True
