@@ -38,7 +38,7 @@ Vagrant.configure(CONFIG_VERSION) do |config|
 
     # For specifying only certain roles
     # ansible.tags = ['nginx','ripple-rest']
-    ansible.tags = ['ripple-rest']
+    # ansible.tags = ['ripple-rest']
 
 
     ansible.groups = {

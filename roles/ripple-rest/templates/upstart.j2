@@ -18,7 +18,7 @@ setgid {{ rest.group }}
 script
     chdir $APPLICATION_PATH
     echo $$ > $PIDFILE
-    exec /usr/bin/nodejs server.js start >> $LOG 2>&1
+    exec npm start >> $LOG 2>&1
 end script
 
 pre-start script
