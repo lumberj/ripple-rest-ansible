@@ -21,7 +21,9 @@ setgid {{ rest.group }}
 
 script
     chdir $APPLICATION_PATH
-    exec start-stop-daemon --start --chuid $RESTUSER:$RESTUSER \
+    exec start-stop-daemon --start \
+        --chuid $RESTUSER:$RESTUSER \
+        --chdir $APPLICATION_PATH \
         --make-pidfile --pidfile $PIDFILE \
         --exec /usr/bin/npm start >> $LOG 2>&1
 end script
