@@ -6,19 +6,24 @@ stop on [!12345]
 
 console log
 
+# Script Variables
 env PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
-env NODE_ENV="production"
 env APPLICATION_PATH="{{ rest.path }}/current"
 env PIDFILE="{{ rest.pid_file }}"
 env LOG="{{ rest.log_dir }}/{{ rest.log }}"
+env RESTUSER
+
+# Daemon Env Variables
+export NODE_ENV="production"
 
 setuid {{ rest.user }}
 setgid {{ rest.group }}
 
 script
     chdir $APPLICATION_PATH
-    echo $$ > $PIDFILE
-    exec npm start >> $LOG 2>&1
+    exec start-stop-daemon --start --chuid $RESTUSER:$RESTUSER \
+        --make-pidfile --pidfile $PIDFILE \
+        --exec /usr/bin/npm start >> $LOG 2>&1
 end script
 
 pre-start script
@@ -26,7 +31,6 @@ pre-start script
 end script
 
 pre-stop script
-    rm -f $PIDFILE
     echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (rest) Stopping" >> $LOG
 end script
 
