@@ -5,3 +5,8 @@
 - name: reload monit
   service: name=monit state=reloaded
 
+- name: check rest
+  shell: status ripple-rest | grep -qw running; echo $?
+  register: rest_status
+  failed_when: rest_status.stdout != '0'
+
