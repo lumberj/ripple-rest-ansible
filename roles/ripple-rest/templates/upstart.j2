@@ -21,11 +21,20 @@ setgid {{ rest.group }}
 
 script
     chdir $APPLICATION_PATH
+
+    if [ -e "./server.js" ]
+        then export SERVER="server.js"
+    elif [ -e "./server/server.js" ]
+        then export SERVER="server/server.js"
+    else
+        exit 1
+    fi
+
     exec start-stop-daemon --start \
         --chuid $RESTUSER:$RESTUSER \
         --chdir $APPLICATION_PATH \
         --make-pidfile --pidfile $PIDFILE \
-        --exec /usr/bin/npm start >> $LOG 2>&1
+        --exec /usr/bin/node $SERVER >> $LOG 2>&1
 end script
 
 pre-start script
