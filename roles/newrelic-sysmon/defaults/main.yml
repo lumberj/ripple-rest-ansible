@@ -1,0 +1,5 @@
+---
+newrelic_ssl: true
+newrelic_logfile: '/var/log/newrelic/nrsysmond.log'
+newrelic_loglevel: info
+newrelic_license_key: REDACTED

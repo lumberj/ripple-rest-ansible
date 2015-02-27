@@ -1,6 +1,7 @@
 ---
 - name: restart rest
   service: name=ripple-rest state=restarted
+  notify: check rest
 
 - name: reload monit
   service: name=monit state=reloaded

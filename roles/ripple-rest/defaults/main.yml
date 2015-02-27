@@ -1,7 +1,7 @@
 ---
 rest:
-  path: /srv/ripple-rest
-  log_dir: /srv/ripple-rest/shared/logs
+  path: '{{ rest_path }}'
+  log_dir: '{{ rest_path }}/shared/logs'
   log: rest.log
   user: restful
   group: restful

@@ -1,0 +1,24 @@
+---
+- name: Install New Relic Node Agent
+  command: >
+    npm install newrelic
+    chdir='{{ rest.path }}/current'
+    creates='{{ rest.path }}/node_modules/newrelic'
+
+- name: Copy newrelic.js
+  template: >
+    src=newrelic.js.j2
+    dest="{{ rest.path }}/current/newrelic.js"
+    owner={{ rest.user }}
+    group={{ rest.group }}
+    mode=0644
+  notify: restart rest
+
+- name: Configure newrelic
+  lineinfile: >
+    dest="{{ rest.path }}/current/server/server.js"
+    line='require("newrelic")'
+    state=present
+    insertbefore=BOF
+  notify: restart rest
+

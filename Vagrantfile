@@ -23,7 +23,6 @@ Vagrant.configure(CONFIG_VERSION) do |config|
     vb.memory = "1024"
   end
 
-
   # To run the provisioner again, just run `vagrant provision`
   # To provision directly with Ansible:
   #
@@ -39,7 +38,7 @@ Vagrant.configure(CONFIG_VERSION) do |config|
     # For specifying only certain roles
     # ansible.tags = ['nginx','ripple-rest']
     # ansible.tags = ['ripple-rest']
-
+    # ansible.tags = ['newrelic']
 
     ansible.groups = {
       "webservers" => ["default"]
@@ -48,8 +47,8 @@ Vagrant.configure(CONFIG_VERSION) do |config|
     ansible.extra_vars = {
       # Override the Ansible configured SSH user
       ansible_ssh_user: 'vagrant',
-      remote_user: 'vagrant'
+      remote_user: 'vagrant',
+      version: 'develop'
     }
-
   end
 end

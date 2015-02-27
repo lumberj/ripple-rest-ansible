@@ -8,3 +8,4 @@
     - nodejs
     - { role: nginx, tags: ['nginx'] }
     - { role: ripple-rest, tags: ['ripple-rest'] }
+    - { role: newrelic-sysmon, tags: ['newrelic'] }

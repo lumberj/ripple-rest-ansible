@@ -52,6 +52,11 @@
     owner=root
     group=root
 
+- name: Include New Relic Node Agent
+  include: newrelic.yml
+  tags:
+    - newrelic
+
 - name: Ensure init.d script absent
   file: path=/etc/init.d/ripple-rest state=absent
 
