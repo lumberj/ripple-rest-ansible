@@ -15,5 +15,10 @@ server {
         proxy_set_header {{ key }} {{ value }};
         {% endfor %}
         {% endif %}
+
+        if ($http_user_agent ~* (urllib)) {
+            return 403;
+        }
+
     }
 }

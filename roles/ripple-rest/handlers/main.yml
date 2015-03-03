@@ -2,8 +2,8 @@
 - name: restart rest
   service: name=ripple-rest state=restarted
 
-- name: reload monit
-  service: name=monit state=reloaded
+- name: restart monit
+  service: name=monit state=restarted
 
 - name: check rest
   shell: status ripple-rest | grep -qw running; echo $?

@@ -8,3 +8,4 @@ rest_port: "5990"
 rest_host: '127.0.0.1'
 version: "develop"
 update: True
+ssl_key: "/etc/ssl/private/private.key"
