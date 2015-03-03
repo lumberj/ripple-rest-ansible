@@ -11,10 +11,8 @@ env PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 env APPLICATION_PATH="{{ rest.path }}/current"
 env PIDFILE="{{ rest.pid_file }}"
 env LOG="{{ rest.log_dir }}/{{ rest.log }}"
-env RESTUSER
-
-# Daemon Env Variables
-export NODE_ENV="production"
+env RESTUSER="{{ rest.user }}"
+env NODE_ENV="production"
 
 setuid {{ rest.user }}
 setgid {{ rest.group }}
@@ -34,7 +32,7 @@ script
         --chuid $RESTUSER:$RESTUSER \
         --chdir $APPLICATION_PATH \
         --make-pidfile --pidfile $PIDFILE \
-        --exec /usr/bin/node $SERVER >> $LOG 2>&1
+        --exec /usr/bin/env NODE_ENV=$NODE_ENV /usr/bin/node $SERVER >> $LOG 2>&1
 end script
 
 pre-start script
