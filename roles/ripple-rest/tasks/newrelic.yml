@@ -16,7 +16,7 @@
 
 - name: Configure newrelic
   lineinfile: >
-    dest="{{ rest.path }}/current/server.js"
+    dest="{{ rest.path }}/current/server/server.js"
     line='require("newrelic")'
     state=present
     insertbefore=BOF
