@@ -4,7 +4,7 @@ check process ripple-rest with pidfile {{ rest.pid_file }}
     start program = "/sbin/start ripple-rest"
     stop program = "/sbin/stop ripple-rest"
     if memory > 25% then restart
-    if failed port 5990 protocol HTTP and request "/v1/server"
+    if failed port 5990 protocol HTTP and request "/v1"
     then restart
 
 set httpd port 2812 and
