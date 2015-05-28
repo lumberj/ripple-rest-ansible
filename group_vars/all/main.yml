@@ -1,6 +1,6 @@
 ---
 rippled_servers:
-  - '"wss://s2.ripple.com:443"'
+  - '"wss://s1.ripple.com:443"'
 rest_path: "/srv/ripple-rest"
 rest_url: "api.ripple.com"
 rest_port: "5990"
